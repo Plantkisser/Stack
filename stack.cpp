@@ -1,10 +1,25 @@
+
+/*
+	В целом уточнение. Открывать-закрывать логфайл каждый раз -
+	дорого. Ну то есть функция fopen() дорогая. Посему лучше все-таки
+	в init() открывать и в destruct() закрывать. И тип прописать в 
+	документации, что надо обязательно вызывать init() и destroy(),
+	иначе сам дурак, если ломается :)
+ */
+
+
 #include <stdio.h>
 #include <stdlib.h>
+
+/*
+	Тут уж явно можно не сокращать буквы)
+ */
 # define ERROR 535
 # define CPCTY 1
 # define KAN 1987
 # define WERROR 365
 # define TEST 7
+
 # define UNITTEST(what, op, ref, type) \
 {\
 	type result = what;\
@@ -20,6 +35,12 @@
 		printf("\n");\
 	}\
 }
+
+/*
+	Запили тут тайпдеф, чтоб у тебя был тип stk_elem
+	Ну или что-то в этом роде
+ */
+
 struct stack
 {
 	int kan1;
@@ -46,12 +67,28 @@ void print_double(double a)
 int check_stack(stack* test)
 {
 	int i = 0;
+/*
+	Не лучше ли?
+
+	FILE* f = fopen("log.txt", "a");
+ */
 	FILE * f;
 	f = fopen("log.txt", "a");
+/*
+	Проверку бы сюда
+ */
+/*
+	Что-то мне подсказывает, что строчка длинновата)
+ */
 	fprintf(f, "Stack text\n{\n\tsize=%d\n\tcount=%d\n\tdata[%d]\n\t{\n", test->capacity, test->size, test->capacity);
 	for (i = 1; i <= test->capacity; i++)
 		fprintf(f, "\t\t[%d] : %d\n", i, test->data[i]);
+
 	fprintf(f, "\t}\n}\n");
+/*
+	Кажется, если ошибка, можно прям тут сигнализировать в логи.
+	И даже если нет, то ты выходишь и не закрываешь файл, а зря.
+ */
 	if (test->data[0] != KAN)
 		return ERROR;
 	if (test->data[test->capacity + 1] != KAN)
@@ -65,6 +102,9 @@ int check_stack(stack* test)
 	return 0;
 }
 
+/*
+	Оычно такие функции называют isnull(). То есть isсвойство()
+ */
 /** compare pointer with NULL
 */
 
@@ -83,12 +123,18 @@ int checkptr (stack * ptr)
 
 int incrcapacity(stack *test)
 {
-	
 	int rezch = check_stack(test);
 	if (rezch == ERROR)
 	{
+/*
+	Про сие уже говорил, кажется)
+	Сразу инициализировать
+ */
 		FILE * f;
 		f = fopen("log.txt", "a");
+/*
+	Проверкуууу
+ */
 		fprintf(f, "Problem with check_stack\n");
 		fclose(f);
 	}
@@ -96,13 +142,21 @@ int incrcapacity(stack *test)
 	
 	if (checkptr(test) == ERROR) return ERROR;
 	int *newdata =(int*) calloc(test->capacity * 2 + 2, sizeof(int));
+/*
+	Проверкаааааа :)
+ */
 	test->capacity = test->capacity * 2;
 	int i = 0;
+
+/*
+	Вообще говоря, если realloc для этого. Но я им не пользовался...)
+ */
 	for (i = 0; i <= test->size; i++)
 	{
 		newdata[i] = test->data[i];
 	}
 	newdata[test->capacity + 1] = KAN; 
+
 	free(test->data);
 	test->data = newdata;
 	return 0;
@@ -111,6 +165,9 @@ int incrcapacity(stack *test)
 /** add a number with type int
 */
 
+/*
+	То же, что и для incrcapacity
+ */
 int push_back(stack *test, int a)
 {
 	int rezch = check_stack(test);
@@ -155,6 +212,10 @@ int push_back(stack *test, int a)
 /** delete the last cell and return cells value
 */
 
+/*
+	Вообще говоря, надо бы сжимать стек, когда там мало остается. 
+	Подсказка - переделать incrcapacity в changecapacity)
+ */
 int pop (stack *test)
 {
 	if (checkptr(test) == ERROR) return ERROR;
@@ -185,6 +246,11 @@ all errors and values of stack will be written in log.txt
 int main ()
 {
 	stack test;
+/*
+	Для этого делается оберточка init():
+
+	int init(stack* stk);
+ */
 	test.kan1 = KAN;
 	test.kan2 = KAN;
 	test.size = 0;
